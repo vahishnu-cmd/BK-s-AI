@@ -2,3 +2,4 @@ streamlit
 google-generativeai
 pypdf
 edge-tts
+youtube-search
