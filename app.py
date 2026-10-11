@@ -4,6 +4,7 @@ import subprocess
 import sys
 from pypdf import PdfReader
 import google.generativeai as genai
+from youtube_search import YoutubeSearch
 
 # =========================================================
 # 🔑 ENTER YOUR GEMINI API KEY HERE
@@ -187,6 +188,13 @@ def extract_checkpoint_question(script):
             return line
     return lines[-1] if lines else "What key concept stood out most to you during this lecture?"
 
+def fetch_related_videos(topic, max_results=3):
+    try:
+        results = YoutubeSearch(topic, max_results=max_results).to_dict()
+        return [f"https://www.youtube.com/watch?v={vid['id']}" for vid in results]
+    except Exception as e:
+        return []
+
 # --- Top Navigation Bar ---
 col_brand, col_status = st.columns([3, 1])
 with col_brand:
@@ -318,7 +326,7 @@ else:
             unsafe_allow_html=True
         )
         
-        tab_stage, tab_notes, tab_analytics = st.tabs(["📺 AI Stage", "📝 Smart Whiteboard", "📈 Learning Analytics"])
+        tab_stage, tab_notes, tab_analytics, tab_videos = st.tabs(["📺 AI Stage", "📝 Smart Whiteboard", "📈 Learning Analytics", "🎥 Related Videos"])
         
         with tab_stage:
             av_col, player_col = st.columns([1, 2])
@@ -356,8 +364,21 @@ else:
             * **Pacing Efficiency:** Optimized for selected duration.
             * **Next Recommended Module:** Advanced Systematic Implementations.
             """)
-            
-        st.markdown("</div>", unsafe_allow_html=True)
+            with tab_videos:
+                st.markdown("#### Supplemental YouTube Resources")
+                st.write(f"Curated videos for: **{st.session_state.current_topic}**")
+                
+                with st.spinner("Fetching related videos..."):
+                    video_urls = fetch_related_videos(st.session_state.current_topic, max_results=3)
+                    
+                    if video_urls:
+                        for url in video_urls:
+                            st.video(url)
+                            st.divider()
+                    else:
+                        st.info("No videos found or search limit reached.")
+                
+            st.markdown("</div>", unsafe_allow_html=True)
 
     with interactive_col:
         st.markdown(
