@@ -136,7 +136,7 @@ def generate_lesson_plan(content, level, time_limit, language):
     {content[:4500]}
     """
     try:
-        model = genai.GenerativeModel('gemini-3.6-flash')
+        model = genai.GenerativeModel('gemini-1.5-flash')
         response = model.generate_content(prompt)
         return response.text
     except Exception as e:
